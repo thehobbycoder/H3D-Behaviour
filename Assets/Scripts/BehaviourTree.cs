@@ -21,6 +21,14 @@ namespace HC_BehaviourTree
             public int level;
             public Node node;
         }
+
+
+        public override Status Process()
+        {
+            return children[currentChild].Process();
+        }
+
+
         public void PrintTree()
         {
 
