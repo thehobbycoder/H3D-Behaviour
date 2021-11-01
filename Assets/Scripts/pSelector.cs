@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace HC_BehaviourTree
 {
-    public class pSelector : Node
+    public class PSelector : Node
     {
 
         bool ordered = false;
 
         Node[] nodeArray;
-        public pSelector(string n)
+        public PSelector(string n)
         {
             name = n;
         }

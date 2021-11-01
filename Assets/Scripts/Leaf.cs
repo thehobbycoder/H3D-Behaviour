@@ -35,11 +35,17 @@ namespace HC_BehaviourTree
         }
         public override Status Process()
         {
+            Node.Status s;
             if(ProcessMethod != null)
-              return ProcessMethod();
+                s =  ProcessMethod();
             else if (ProcessMethodM != null)
-              return ProcessMethodM(index);  
-            return Status.FAILURE;
+                s = ProcessMethodM(index);  
+            else
+                s = Status.FAILURE;
+
+
+            Debug.Log(name + " " + s);
+            return s;
         }
     }
 }
