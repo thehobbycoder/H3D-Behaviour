@@ -1964,10 +1964,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4a223aac2ee2f840a994bfe395dea58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agent: {fileID: 0}
+  state: 0
+  treeStatus: 1
   frontDoor: {fileID: 1791870521}
   backdoor: {fileID: 919599686}
   diamond: {fileID: 1550492363}
+  painting: {fileID: 1904932022}
   van: {fileID: 575244120}
+  money: 800
 --- !u!195 &642336162
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -4,44 +4,49 @@ using UnityEngine;
 using UnityEngine.AI;
 namespace HC_BehaviourTree
 {
-    public class RobberBehaviour : MonoBehaviour
+    public class RobberBehaviour : BTAgent
     {
-        BehaviourTree tree;
+       
         public GameObject frontDoor;
         public GameObject backdoor;
         public GameObject diamond;
+        public GameObject painting;
         public GameObject van;
-        NavMeshAgent agent;
-
-        public enum ActionState {  IDLE, WORKING}
-        ActionState state = ActionState.IDLE;
-
-        Node.Status treeStatus = Node.Status.RUNNING;
-
+       
         [Range(0, 1000)]
         public int money = 800;
 
-        void Start()
+      new void Start()
         {
-            agent = this.GetComponent<NavMeshAgent>();
 
-            tree = new BehaviourTree();
+            base.Start();
             Sequence steal = new Sequence("Steal Something");
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
             Leaf gotoFrontDoor = new Leaf("Go to Door", GoToFronDoor);
             Leaf gotoDiamond = new Leaf("Go to Diamond", GoToDiamond);
+            Leaf gotoPainting = new Leaf("Go to Diamond", GoToPainting);
             Leaf gotoBackDoor= new Leaf("Go to Door", GoToBackDoor);
             Leaf gotoVan = new Leaf("Go to Van", GoToVan);
+          
+            Inverter invertMoney = new Inverter("Invert Money");
+            invertMoney.AddChild(hasGotMoney);
+
+
             Selector openDoor = new Selector("Open Door");
+            Selector selectObjectToSteal = new Selector("Select Object To Steal");
 
             openDoor.AddChild(gotoFrontDoor);
             openDoor.AddChild(gotoBackDoor);
 
 
-            steal.AddChild(hasGotMoney);
+            steal.AddChild(invertMoney);
             steal.AddChild(openDoor);
-            steal.AddChild(gotoDiamond);
-           // steal.AddChild(gotoBackDoor);
+
+            selectObjectToSteal.AddChild(gotoDiamond);
+            selectObjectToSteal.AddChild(gotoPainting);
+
+            steal.AddChild(selectObjectToSteal);
+            // steal.AddChild(gotoBackDoor);
             steal.AddChild(gotoVan);
             tree.AddChild(steal);
 
@@ -53,7 +58,7 @@ namespace HC_BehaviourTree
 
         public Node.Status HasMoney()
         {
-            if(money >= 500)
+            if(money < 500)
             {
                 return Node.Status.FAILURE;
             }
@@ -79,6 +84,20 @@ namespace HC_BehaviourTree
             if (s == Node.Status.SUCCESS)
             {
                 diamond.SetActive(false);
+            }
+
+
+            return s;
+
+
+        }
+
+        public Node.Status GoToPainting()
+        {
+            Node.Status s = GoToLocation(painting.transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                painting.SetActive(false);
             }
            
             
@@ -107,6 +126,7 @@ namespace HC_BehaviourTree
             if(s == Node.Status.SUCCESS)
             {
                 if (!door.GetComponent< Lock>().isLocked){
+                    door.GetComponent<NavMeshObstacle>().enabled = false;
                     door.SetActive(false);
                     return Node.Status.SUCCESS;
                 }
@@ -119,33 +139,7 @@ namespace HC_BehaviourTree
             }
         }
 
-        Node.Status GoToLocation(Vector3 destination)
-        {
-            float distanceToTarget = Vector3.Distance(destination, transform.position);
-            if(state == ActionState.IDLE)
-            {
-                agent.SetDestination(destination);
-                state = ActionState.WORKING;
-            }else if (Vector3.Distance(agent.pathEndPosition, destination) >= 2)
-            {
-                state = ActionState.IDLE;
-                return Node.Status.FAILURE;
-            }
-            else if (distanceToTarget < 2)
-            {
-                state = ActionState.IDLE;
-                return Node.Status.SUCCESS;
-            }
+   
 
-            return Node.Status.RUNNING;
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            if(treeStatus != Node.Status.SUCCESS)
-                treeStatus =  tree.Process();
-        }
     }
 }
