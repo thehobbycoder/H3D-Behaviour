@@ -15,6 +15,7 @@ namespace HC_BehaviourTree
         public Node.Status treeStatus = Node.Status.RUNNING;
 
         WaitForSeconds waitForSeconds;
+        Vector3 rememberedLocation;
 
         // Start is called before the first frame update
         public virtual void Start()
@@ -44,6 +45,37 @@ namespace HC_BehaviourTree
                 return Node.Status.SUCCESS;
             }
             return Node.Status.RUNNING;
+        }
+
+
+        public Node.Status CanSee(Vector3 target, string tag, float distance, float maxAngle)
+        {
+            Vector3 directionToTarget = target - this.transform.position;
+            float angle = Vector3.Angle(directionToTarget, this.transform.forward);
+
+            if(angle <= maxAngle || directionToTarget.magnitude <= distance)
+            {
+                RaycastHit hitInfo;
+                if(Physics.Raycast(this.transform.position, directionToTarget, out hitInfo))
+                {
+                    if (hitInfo.collider.gameObject.CompareTag(tag))
+                    {
+                        return Node.Status.SUCCESS;
+                    }
+                }
+            }
+
+            return Node.Status.FAILURE;
+        }
+
+        public Node.Status Flee(Vector3 location, float distance)
+        {
+            if (state == ActionState.IDLE)
+            {
+                rememberedLocation = this.transform.position + (transform.position - location).normalized * distance;
+            }
+
+            return GoToLocation(rememberedLocation);
         }
 
         IEnumerator Behave()

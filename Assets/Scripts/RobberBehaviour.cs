@@ -13,6 +13,8 @@ namespace HC_BehaviourTree
         public GameObject painting;
         public GameObject van;
 
+       public GameObject cop;
+
         public GameObject[] art;
 
         GameObject pickup;
@@ -29,17 +31,22 @@ namespace HC_BehaviourTree
             Leaf goToPainting = new Leaf("Go To Painting", GoToPainting, 2);
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
 
-            Leaf gotoArt1 = new Leaf("Go To Art 1", GoToArt1);
-            Leaf gotoArt2= new Leaf("Go To Art 2", GoToArt2);
-            Leaf gotoArt3 = new Leaf("Go To Art 3", GoToArt3);
-          
+     
+
+            RSelector selectObject = new RSelector("Select Object to Steal");
+
+            for (int i = 0; i < art.Length; i++)
+            {
+                Leaf gta = new Leaf("Go to " + art[i].name, i, GoToArt);
+                selectObject.AddChild(gta);
+            }
 
 
             Leaf goToBackDoor = new Leaf("Go To Backdoor", GoToBackDoor, 2);
             Leaf goToFrontDoor = new Leaf("Go To Frontdoor", GoToFrontDoor, 1);
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
             pSelector opendoor = new pSelector("Open Door");
-            RSelector selectObject = new RSelector("Select Object to Steal");
+         
 
             Inverter invertMoney = new Inverter("Invert Money");
             invertMoney.AddChild(hasGotMoney);
@@ -50,21 +57,33 @@ namespace HC_BehaviourTree
             steal.AddChild(invertMoney);
             steal.AddChild(opendoor);
 
-           
-            selectObject.AddChild(gotoArt1);
-            selectObject.AddChild(gotoArt2);
-            selectObject.AddChild(gotoArt3);
-
             steal.AddChild(selectObject);
 
           
             steal.AddChild(goToVan);
-            tree.AddChild(steal);
+
+            Sequence runAway = new Sequence("Run Away");
+            Leaf canSee = new Leaf("Can See cop?", CanSeeCop);
+            Leaf flee = new Leaf("Flee from cop?", FleeFromCop);
+            runAway.AddChild(canSee);
+            runAway.AddChild(flee);
+            tree.AddChild(runAway); ;
 
             tree.PrintTree();
 
 
 
+        }
+
+        public Node.Status CanSeeCop()
+        {
+            return CanSee(cop.transform.position, "Cop", 10, 90);
+        }
+
+        public Node.Status FleeFromCop()
+        {
+        
+            return Flee(cop.transform.position, 10);
         }
 
         public Node.Status HasMoney()
@@ -87,42 +106,18 @@ namespace HC_BehaviourTree
         }
 
 
-        public Node.Status GoToArt1()
+        public Node.Status GoToArt(int i)
         {
-            if (!art[0].activeSelf) return Node.Status.FAILURE;
-            Node.Status s = GoToLocation(art[0].transform.position);
+            if (!art[i].activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(art[i].transform.position);
             if (s == Node.Status.SUCCESS)
             {
-                art[0].transform.parent = this.gameObject.transform;
-                pickup = art[0];
+                art[i].transform.parent = this.gameObject.transform;
+                pickup = art[i];
             }
             return s;
         }
 
-        public Node.Status GoToArt2()
-        {
-            if (!art[1].activeSelf) return Node.Status.FAILURE;
-            Node.Status s = GoToLocation(art[1].transform.position);
-            if (s == Node.Status.SUCCESS)
-            {
-                art[1].transform.parent = this.gameObject.transform;
-                pickup = art[1];
-            }
-            return s;
-        }
-
-
-        public Node.Status GoToArt3()
-        {
-            if (!art[2].activeSelf) return Node.Status.FAILURE;
-            Node.Status s = GoToLocation(art[2].transform.position);
-            if (s == Node.Status.SUCCESS)
-            {
-                art[2].transform.parent = this.gameObject.transform;
-                pickup = art[2];
-            }
-            return s;
-        }
 
 
         public Node.Status GoToPainting()
