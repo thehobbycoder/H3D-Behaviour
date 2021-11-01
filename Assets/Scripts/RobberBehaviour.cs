@@ -13,6 +13,8 @@ namespace HC_BehaviourTree
         public GameObject painting;
         public GameObject van;
 
+        public GameObject[] art;
+
         GameObject pickup;
        
         [Range(0, 1000)]
@@ -26,11 +28,18 @@ namespace HC_BehaviourTree
             Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond, 1);
             Leaf goToPainting = new Leaf("Go To Painting", GoToPainting, 2);
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
+
+            Leaf gotoArt1 = new Leaf("Go To Art 1", GoToArt1);
+            Leaf gotoArt2= new Leaf("Go To Art 2", GoToArt2);
+            Leaf gotoArt3 = new Leaf("Go To Art 3", GoToArt3);
+          
+
+
             Leaf goToBackDoor = new Leaf("Go To Backdoor", GoToBackDoor, 2);
             Leaf goToFrontDoor = new Leaf("Go To Frontdoor", GoToFrontDoor, 1);
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
             pSelector opendoor = new pSelector("Open Door");
-            pSelector selectObject = new pSelector("Select Object to Steal");
+            RSelector selectObject = new RSelector("Select Object to Steal");
 
             Inverter invertMoney = new Inverter("Invert Money");
             invertMoney.AddChild(hasGotMoney);
@@ -42,8 +51,9 @@ namespace HC_BehaviourTree
             steal.AddChild(opendoor);
 
            
-            selectObject.AddChild(goToDiamond);
-            selectObject.AddChild(goToPainting);
+            selectObject.AddChild(gotoArt1);
+            selectObject.AddChild(gotoArt2);
+            selectObject.AddChild(gotoArt3);
 
             steal.AddChild(selectObject);
 
@@ -75,6 +85,45 @@ namespace HC_BehaviourTree
             }
             return s;
         }
+
+
+        public Node.Status GoToArt1()
+        {
+            if (!art[0].activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(art[0].transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                art[0].transform.parent = this.gameObject.transform;
+                pickup = art[0];
+            }
+            return s;
+        }
+
+        public Node.Status GoToArt2()
+        {
+            if (!art[1].activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(art[1].transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                art[1].transform.parent = this.gameObject.transform;
+                pickup = art[1];
+            }
+            return s;
+        }
+
+
+        public Node.Status GoToArt3()
+        {
+            if (!art[2].activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(art[2].transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                art[2].transform.parent = this.gameObject.transform;
+                pickup = art[2];
+            }
+            return s;
+        }
+
 
         public Node.Status GoToPainting()
         {

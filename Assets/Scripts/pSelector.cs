@@ -7,6 +7,8 @@ namespace HC_BehaviourTree
     public class pSelector : Node
     {
 
+        bool ordered = false;
+
         Node[] nodeArray;
         public pSelector(string n)
         {
@@ -21,7 +23,13 @@ namespace HC_BehaviourTree
         }
         public override Status Process()
         {
-            OrderNodes();
+
+            if(!ordered)
+            {
+                OrderNodes();
+                ordered = true;
+            }
+        
             Status childStatus = children[currentChild].Process();
             if (childStatus == Status.RUNNING) return Status.RUNNING;
 
@@ -29,6 +37,7 @@ namespace HC_BehaviourTree
             {
                 children[currentChild].sortOrder = 1;
                 currentChild = 0;
+                ordered = false;
                 return Status.SUCCESS;
             }
             else
@@ -40,6 +49,7 @@ namespace HC_BehaviourTree
             if (currentChild >= children.Count)
             {
                 currentChild = 0;
+                ordered = false;
                 return Status.FAILURE;
             }
 

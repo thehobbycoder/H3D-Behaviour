@@ -1972,6 +1972,15 @@ MonoBehaviour:
   diamond: {fileID: 1550492363}
   painting: {fileID: 1904932022}
   van: {fileID: 575244120}
+  art:
+  - {fileID: 1904932022}
+  - {fileID: 1101234485}
+  - {fileID: 1922895633}
+  - {fileID: 1544815185}
+  - {fileID: 1959054990}
+  - {fileID: 925317490}
+  - {fileID: 425408384}
+  - {fileID: 915494408}
   money: 800
 --- !u!195 &642336162
 NavMeshAgent:
