@@ -12,6 +12,8 @@ namespace HC_BehaviourTree
         public GameObject diamond;
         public GameObject painting;
         public GameObject van;
+
+        GameObject pickup;
        
         [Range(0, 1000)]
         public int money = 800;
@@ -21,125 +23,108 @@ namespace HC_BehaviourTree
 
             base.Start();
             Sequence steal = new Sequence("Steal Something");
+            Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond, 1);
+            Leaf goToPainting = new Leaf("Go To Painting", GoToPainting, 2);
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
-            Leaf gotoFrontDoor = new Leaf("Go to Door", GoToFronDoor);
-            Leaf gotoDiamond = new Leaf("Go to Diamond", GoToDiamond);
-            Leaf gotoPainting = new Leaf("Go to Diamond", GoToPainting);
-            Leaf gotoBackDoor= new Leaf("Go to Door", GoToBackDoor);
-            Leaf gotoVan = new Leaf("Go to Van", GoToVan);
-          
+            Leaf goToBackDoor = new Leaf("Go To Backdoor", GoToBackDoor, 2);
+            Leaf goToFrontDoor = new Leaf("Go To Frontdoor", GoToFrontDoor, 1);
+            Leaf goToVan = new Leaf("Go To Van", GoToVan);
+            pSelector opendoor = new pSelector("Open Door");
+            pSelector selectObject = new pSelector("Select Object to Steal");
+
             Inverter invertMoney = new Inverter("Invert Money");
             invertMoney.AddChild(hasGotMoney);
 
-
-            Selector openDoor = new Selector("Open Door");
-            Selector selectObjectToSteal = new Selector("Select Object To Steal");
-
-            openDoor.AddChild(gotoFrontDoor);
-            openDoor.AddChild(gotoBackDoor);
-
+            opendoor.AddChild(goToFrontDoor);
+            opendoor.AddChild(goToBackDoor);
 
             steal.AddChild(invertMoney);
-            steal.AddChild(openDoor);
+            steal.AddChild(opendoor);
 
-            selectObjectToSteal.AddChild(gotoDiamond);
-            selectObjectToSteal.AddChild(gotoPainting);
+           
+            selectObject.AddChild(goToDiamond);
+            selectObject.AddChild(goToPainting);
 
-            steal.AddChild(selectObjectToSteal);
-            // steal.AddChild(gotoBackDoor);
-            steal.AddChild(gotoVan);
+            steal.AddChild(selectObject);
+
+          
+            steal.AddChild(goToVan);
             tree.AddChild(steal);
 
             tree.PrintTree();
 
-         
-          
+
+
         }
 
         public Node.Status HasMoney()
         {
-            if(money < 500)
-            {
+            if (money < 500)
                 return Node.Status.FAILURE;
-            }
             return Node.Status.SUCCESS;
-
         }
 
-        public Node.Status GoToFronDoor()
+        public Node.Status GoToDiamond()
         {
-            return GoToDoor(frontDoor);
+            if (!diamond.activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(diamond.transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                diamond.transform.parent = this.gameObject.transform;
+                pickup = diamond;
+            }
+            return s;
+        }
 
+        public Node.Status GoToPainting()
+        {
+            if (!painting.activeSelf) return Node.Status.FAILURE;
+            Node.Status s = GoToLocation(painting.transform.position);
+            if (s == Node.Status.SUCCESS)
+            {
+                painting.transform.parent = this.gameObject.transform;
+                pickup = painting;
+            }
+            return s;
         }
 
         public Node.Status GoToBackDoor()
         {
             return GoToDoor(backdoor);
-
         }
 
-        public Node.Status GoToDiamond()
+        public Node.Status GoToFrontDoor()
         {
-            Node.Status s = GoToLocation(diamond.transform.position);
-            if (s == Node.Status.SUCCESS)
-            {
-                diamond.SetActive(false);
-            }
-
-
-            return s;
-
-
-        }
-
-        public Node.Status GoToPainting()
-        {
-            Node.Status s = GoToLocation(painting.transform.position);
-            if (s == Node.Status.SUCCESS)
-            {
-                painting.SetActive(false);
-            }
-           
-            
-            return s;
-           
-
+            return GoToDoor(frontDoor);
         }
 
         public Node.Status GoToVan()
         {
-            Node.Status s =  GoToLocation(van.transform.position);
+            Node.Status s = GoToLocation(van.transform.position);
             if (s == Node.Status.SUCCESS)
-            {
-                money += 500;
+            {               
+                money += 300;
+                pickup.SetActive(false);
             }
-
-
             return s;
-
         }
 
         public Node.Status GoToDoor(GameObject door)
         {
             Node.Status s = GoToLocation(door.transform.position);
-
-            if(s == Node.Status.SUCCESS)
+            if (s == Node.Status.SUCCESS)
             {
-                if (!door.GetComponent< Lock>().isLocked){
+                if (!door.GetComponent<Lock>().isLocked)
+                {
                     door.GetComponent<NavMeshObstacle>().enabled = false;
-                    door.SetActive(false);
                     return Node.Status.SUCCESS;
                 }
-
                 return Node.Status.FAILURE;
             }
             else
-            {
                 return s;
-            }
         }
 
-   
 
     }
 }

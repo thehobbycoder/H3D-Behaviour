@@ -12,12 +12,14 @@ namespace HC_BehaviourTree
 
         public override Status Process()
         {
-
+           
             Status childStatus = children[currentChild].Process();
+           
             if (childStatus == Status.RUNNING) return Status.RUNNING;
+
             if (childStatus == Status.FAILURE)
             {
-                return childStatus;
+                return Status.FAILURE;
             }
 
             currentChild++;
