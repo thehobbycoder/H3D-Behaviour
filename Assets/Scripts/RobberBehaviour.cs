@@ -100,8 +100,17 @@ namespace HC_BehaviourTree
             tree.AddChild(beThief);
 
             tree.PrintTree();
+            StartCoroutine(DecreaseMoney());
 
+        }
 
+        IEnumerator DecreaseMoney()
+        {
+            while (true)
+            {
+                money = Mathf.Clamp(money - 20, 0, 1000);
+                yield return new WaitForSeconds(Random.Range(1, 5));
+            }
         }
 
         public Node.Status CanSeeCop()
@@ -134,7 +143,6 @@ namespace HC_BehaviourTree
             return s;
         }
 
-
         public Node.Status GoToArt(int i)
         {
             if (!art[i].activeSelf) return Node.Status.FAILURE;
@@ -163,12 +171,22 @@ namespace HC_BehaviourTree
 
         public Node.Status GoToBackDoor()
         {
-            return GoToDoor(backdoor);
+            Node.Status s = GoToDoor(backdoor);
+            if (s == Node.Status.FAILURE)
+                goToBackDoor.sortOrder = 10;
+            else
+                goToBackDoor.sortOrder = 1;
+            return s;
         }
 
         public Node.Status GoToFrontDoor()
         {
-            return GoToDoor(frontDoor);
+            Node.Status s = GoToDoor(frontDoor);
+            if (s == Node.Status.FAILURE)
+                goToFrontDoor.sortOrder = 10;
+            else
+                goToFrontDoor.sortOrder = 1;
+            return s;
         }
 
         public Node.Status GoToVan()
@@ -185,21 +203,7 @@ namespace HC_BehaviourTree
             return s;
         }
 
-        public Node.Status GoToDoor(GameObject door)
-        {
-            Node.Status s = GoToLocation(door.transform.position);
-            if (s == Node.Status.SUCCESS)
-            {
-                if (!door.GetComponent<Lock>().isLocked)
-                {
-                    door.GetComponent<NavMeshObstacle>().enabled = false;
-                    return Node.Status.SUCCESS;
-                }
-                return Node.Status.FAILURE;
-            }
-            else
-                return s;
-        }
+
 
 
     }
