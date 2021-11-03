@@ -16,7 +16,7 @@ namespace HC_BehaviourTree
         public int boredome = 0;
 
         public bool ticket = false;
-
+        public bool isWaiting = false;
         public override void Start()
         {
             base.Start();
@@ -120,7 +120,7 @@ namespace HC_BehaviourTree
         public Node.Status GoToHome()
         {
             Node.Status s = GoToLocation(homeBase.transform.position);
-            
+            isWaiting = false;
             return s;
         }
 
@@ -152,7 +152,8 @@ namespace HC_BehaviourTree
 
         public Node.Status IsWaiting()
         {
-            if(Blackboard.Instance.RegisterPatron(this.gameObject) == this.gameObject){
+            if(Blackboard.Instance.RegisterPatron(this.gameObject) ){
+                isWaiting = true;
                 return Node.Status.SUCCESS;
             }
             else

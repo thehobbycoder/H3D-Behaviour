@@ -23,9 +23,6 @@ namespace HC_BehaviourTree
         }
 
 
-
-
-
         struct NodeLevel
         {
             public int level;

@@ -106,7 +106,7 @@ namespace HC_BehaviourTree
         public Node.Status IsOpen()
         {
 
-            if (Blackboard.Instance.timeOfDay < 9 || Blackboard.Instance.timeOfDay > 21)
+            if (Blackboard.Instance.timeOfDay < Blackboard.Instance.openTime || Blackboard.Instance.timeOfDay > Blackboard.Instance.closeTime)
             {
                 return Node.Status.FAILURE;
             }
