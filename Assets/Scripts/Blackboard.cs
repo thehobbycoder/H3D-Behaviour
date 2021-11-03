@@ -9,6 +9,7 @@ namespace HC_BehaviourTree
 
         public float timeOfDay;
         public Text clock;
+        public GameObject patron;
 
         static Blackboard instance;
 
@@ -54,10 +55,25 @@ namespace HC_BehaviourTree
 
                 if (timeOfDay > 23) timeOfDay = 0;
                 clock.text = timeOfDay + ":00";
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(2f);
             }
         }
 
-     
+        public GameObject RegisterPatron(GameObject p)
+        {
+            if(patron == null)
+            {
+                patron = p;
+              
+            }
+
+            return patron;
+        }
+
+        public void DeregisterPatron()
+        {
+            patron = null;
+          
+        }
     }
 }

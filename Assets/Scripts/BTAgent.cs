@@ -103,6 +103,20 @@ namespace HC_BehaviourTree
                 return s;
         }
 
+        public Node.Status IsOpen()
+        {
+
+            if (Blackboard.Instance.timeOfDay < 9 || Blackboard.Instance.timeOfDay > 21)
+            {
+                return Node.Status.FAILURE;
+            }
+            else
+            {
+                return Node.Status.SUCCESS;
+            }
+
+        }
+
 
     }
 }

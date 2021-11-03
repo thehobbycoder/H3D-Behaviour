@@ -15,6 +15,8 @@ namespace HC_BehaviourTree
         [Range(0,1000)]
         public int boredome = 0;
 
+        public bool ticket = false;
+
         public override void Start()
         {
             base.Start();
@@ -34,6 +36,17 @@ namespace HC_BehaviourTree
             viewArt.AddChild(isOpen);
             viewArt.AddChild(isBored);
             viewArt.AddChild(gotoFrontDoor);
+
+            Leaf noTicket = new Leaf("Wait for Ticket", NoTicket);
+            Leaf isWaiting = new Leaf("Waiting for Worker", IsWaiting);
+
+            BehaviourTree waitforTicket = new BehaviourTree("wait for Ticket");
+            waitforTicket.AddChild(noTicket);
+
+            Loop getTicket = new Loop("Ticket", waitforTicket);
+            getTicket.AddChild(isWaiting);
+
+            viewArt.AddChild(getTicket);
 
             BehaviourTree whileBored = new BehaviourTree();
              whileBored.AddChild(isBored);
@@ -125,11 +138,9 @@ namespace HC_BehaviourTree
 
         }
 
-
-        public Node.Status IsOpen()
+        public Node.Status NoTicket()
         {
-
-            if (Blackboard.Instance.timeOfDay < 9 || Blackboard.Instance.timeOfDay > 17)
+            if(ticket || IsOpen() == Node.Status.FAILURE)
             {
                 return Node.Status.FAILURE;
             }
@@ -137,8 +148,19 @@ namespace HC_BehaviourTree
             {
                 return Node.Status.SUCCESS;
             }
-
         }
+
+        public Node.Status IsWaiting()
+        {
+            if(Blackboard.Instance.RegisterPatron(this.gameObject) == this.gameObject){
+                return Node.Status.SUCCESS;
+            }
+            else
+            {
+                return Node.Status.FAILURE;
+            }
+        }
+   
 
     }
 }

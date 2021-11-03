@@ -78,8 +78,14 @@ namespace HC_BehaviourTree
             steal.AddChild(s2);
             steal.AddChild(s3);
             steal.AddChild(s4);*/
+
+            Leaf isOpen = new Leaf("IsOpen", IsOpen);
+            Inverter isClosed = new Inverter("IsClosed");
+            isClosed.AddChild(isOpen);
+
             BehaviourTree stealConditions = new BehaviourTree();
             Sequence conditions = new Sequence("Stealing Conditions");
+            conditions.AddChild(isClosed);
             conditions.AddChild(cantSeeCop);
             conditions.AddChild(invertMoney);
             stealConditions.AddChild(conditions);
@@ -198,6 +204,7 @@ namespace HC_BehaviourTree
                 {
                     money += 300;
                     pickup.SetActive(false);
+                    pickup = null;
                 }
             }
             return s;
