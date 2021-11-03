@@ -17,7 +17,9 @@ namespace HC_BehaviourTree
 
         public override Status Process()
         {
-            if (dependancy.Process() == Status.FAILURE)
+            Status dependencyStatus = dependancy.Process();
+
+            if (dependencyStatus == Status.FAILURE)
             {
                 agent.ResetPath();
                 // Reset all children
@@ -28,6 +30,8 @@ namespace HC_BehaviourTree
                 }
                 return Status.FAILURE;
             }
+
+            if(dependencyStatus == Status.RUNNING) { return Status.RUNNING; }
 
             Status childstatus = children[currentChild].Process();
             if (childstatus == Status.RUNNING) return Status.RUNNING;

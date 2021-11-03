@@ -6,7 +6,7 @@ namespace HC_BehaviourTree
 {
     public class PatronBehavior : BTAgent
     {
-
+        Animator anim;
         public GameObject[] art;
         public GameObject frontDoor;
         public GameObject homeBase;
@@ -18,7 +18,7 @@ namespace HC_BehaviourTree
         public override void Start()
         {
             base.Start();
-
+            anim = GetComponent<Animator>();
             RSelector selectObject = new RSelector("Select Art to View");
             for (int i = 0; i < art.Length; i++)
             {
@@ -28,20 +28,56 @@ namespace HC_BehaviourTree
             Leaf gotoFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
             Leaf gotoHome = new Leaf("Go To Home", GoToHome);
             Leaf isBored = new Leaf("Is Bored", IsBored);
+            Leaf isOpen = new Leaf("Is Open", IsOpen);
 
             Sequence viewArt = new Sequence("View Art");
+            viewArt.AddChild(isOpen);
             viewArt.AddChild(isBored);
             viewArt.AddChild(gotoFrontDoor);
-            viewArt.AddChild(selectObject);
+
+            BehaviourTree whileBored = new BehaviourTree();
+             whileBored.AddChild(isBored);
+
+            Loop lookAtPaintings = new Loop("Look", whileBored);
+            lookAtPaintings.AddChild(selectObject);
+            viewArt.AddChild(lookAtPaintings);
+
+
             viewArt.AddChild(gotoHome);
 
-            Selector bePatron = new Selector("Be An Art Patron");
+            BehaviourTree galleryOpenCondition = new BehaviourTree();
+            galleryOpenCondition.AddChild(isOpen);
+
+            DepSequence bePatron = new DepSequence("Be An Art Patron", galleryOpenCondition, agent);
             bePatron.AddChild(viewArt);
 
-            tree.AddChild(bePatron);
+            Selector viewArtWithFallback = new Selector("View art with fallback");
+            viewArtWithFallback.AddChild(bePatron);
+            viewArtWithFallback.AddChild(gotoHome);
+
+            tree.AddChild(viewArtWithFallback);
 
             StartCoroutine(IncreaseBoredome());
         }
+
+
+        private Vector3 previousPosition;
+        public float curSpeed;
+        void Update()
+        {
+            float finalSpeed;
+            Vector3 curMove = transform.position - previousPosition;
+            curSpeed = curMove.magnitude / Time.deltaTime;
+            previousPosition = transform.position;
+
+            finalSpeed = Mathf.Clamp(curSpeed, 0, 1);
+            if(anim != null)
+            {
+                anim.SetFloat("speed", finalSpeed);
+            }
+        }
+
+
 
         IEnumerator IncreaseBoredome()
         {
@@ -57,7 +93,7 @@ namespace HC_BehaviourTree
             Node.Status s = GoToLocation(art[i].transform.position);
             if(s == Node.Status.SUCCESS)
             {
-                boredome = Mathf.Clamp(boredome - 500, 0, 1000);
+                boredome = Mathf.Clamp(boredome - 10, 0, 1000);
             }
             return s;
         }
@@ -79,6 +115,21 @@ namespace HC_BehaviourTree
         {
 
             if(boredome < 100)
+            {
+                return Node.Status.FAILURE;
+            }
+            else
+            {
+                return Node.Status.SUCCESS;
+            }
+
+        }
+
+
+        public Node.Status IsOpen()
+        {
+
+            if (Blackboard.Instance.timeOfDay < 9 || Blackboard.Instance.timeOfDay > 17)
             {
                 return Node.Status.FAILURE;
             }
